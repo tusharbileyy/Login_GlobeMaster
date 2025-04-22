@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+       
+        .auth-container {
+            background-color: white;
+            width: 600px;
+            height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+       
+        .form-section {
+            width: 50%;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+       
+        .signup-section {
+            background-color: #f9f9f9;
+        }
+       
+        .login-section {
+            background-color: #ffffff;
+            display: none;
+        }
+       
+        h2 {
+            color: #333;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+       
+        .input-group {
+            margin-bottom: 20px;
+        }
+       
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #555;
+        }
+       
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+       
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+       
+        button:hover {
+            background-color: #45a049;
+        }
+       
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #2196F3;
+            padding: 8px 15px;
+            width: auto;
+            font-size: 14px;
+        }
+       
+        .toggle-btn:hover {
+            background-color: #0b7dda;
+        }
+       
+        .message {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+        }
+       
+        .error {
+            color: #f44336;
+        }
+       
+        .success {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="form-section signup-section">
+            <h2>Sign Up</h2>
+            <form id="signupForm">
+                <div class="input-group">
+                    <label for="signup-username">Username:</label>
+                    <input type="text" id="signup-username" required>
+                </div>
+                <div class="input-group">
+                    <label for="signup-password">Password:</label>
+                    <input type="password" id="signup-password" required>
+                </div>
+                <button type="submit">Sign Up</button>
+            </form>
+            <div class="message" id="signup-message"></div>
+        </div>
+       
+        <div class="form-section login-section">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="login-username">Username:</label>
+                    <input type="text" id="login-username" required>
+                </div>
+                <div class="input-group">
+                    <label for="login-password">Password:</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div class="message" id="login-message"></div>
+        </div>
+       
+        <button class="toggle-btn" id="toggleBtn">Switch to Login</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize localStorage with default credentials if empty
+            if (!localStorage.getItem('users')) {
+                const defaultUser = {
+                    'abc': {
+                        username: 'abc',
+                        password: 'abc123'
+                    }
+                };
+                localStorage.setItem('users', JSON.stringify(defaultUser));
+            }
+           
+            // DOM elements
+            const signupForm = document.getElementById('signupForm');
+            const loginForm = document.getElementById('loginForm');
+            const toggleBtn = document.getElementById('toggleBtn');
+            const signupSection = document.querySelector('.signup-section');
+            const loginSection = document.querySelector('.login-section');
+            const signupMessage = document.getElementById('signup-message');
+            const loginMessage = document.getElementById('login-message');
+           
+            // Toggle between forms
+            toggleBtn.addEventListener('click', function() {
+                if (signupSection.style.display !== 'none') {
+                    signupSection.style.display = 'none';
+                    loginSection.style.display = 'block';
+                    toggleBtn.textContent = 'Switch to Signup';
+                } else {
+                    signupSection.style.display = 'block';
+                    loginSection.style.display = 'none';
+                    toggleBtn.textContent = 'Switch to Login';
+                }
+            });
+           
+            // Signup form submission
+            signupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+               
+                const username = document.getElementById('signup-username').value;
+                const password = document.getElementById('signup-password').value;
+               
+                // Get existing users from localStorage
+                const users = JSON.parse(localStorage.getItem('users'));
+               
+                // Check if username already exists
+                if (users[username]) {
+                    signupMessage.textContent = 'Username already exists!';
+                    signupMessage.className = 'message error';
+                    return;
+                }
+               
+                // Add new user
+                users[username] = { username, password };
+                localStorage.setItem('users', JSON.stringify(users));
+               
+                // Show success message
+                signupMessage.textContent = 'Account created successfully!';
+                signupMessage.className = 'message success';
+               
+                // Clear form
+                signupForm.reset();
+               
+                // Auto-switch to login form after 1 second
+                setTimeout(() => {
+                    signupSection.style.display = 'none';
+                    loginSection.style.display = 'block';
+                    toggleBtn.textContent = 'Switch to Signup';
+                    // Pre-fill the login form
+                    document.getElementById('login-username').value = username;
+                }, 1000);
+            });
+           
+            // Login form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+               
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+               
+                // Get users from localStorage
+                const users = JSON.parse(localStorage.getItem('users'));
+               
+                // Check credentials
+                if (users[username] && users[username].password === password) {
+                    loginMessage.textContent = 'Login successful! Redirecting...';
+                    loginMessage.className = 'message success';
+                   
+                    // Redirect after 1 second
+                    setTimeout(() => {
+                        window.location.href = 'https://tusharbiley.github.io/globemaster/';
+                    }, 1000);
+                } else {
+                    loginMessage.textContent = 'Invalid username or password!';
+                    loginMessage.className = 'message error';
+                }
+            });
+           
+            // Pre-fill default credentials in login form for demo
+            document.getElementById('login-username').value = 'abc';
+            document.getElementById('login-password').value = 'abc123';
+        });
+    </script>
+</body>
+</html>
